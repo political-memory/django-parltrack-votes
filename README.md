@@ -22,12 +22,18 @@ For dev, this will look something like this:
     git clone git@github.com:Psycojoker/django-parltrack-votes.git
     git clone git@github.com:Psycojoker/django-parltrack-meps.git
 
+    pip install django
     pip install -r django-parltrack-votes-data/requirements.txt
 
     django-admin.py startproject testing
     cd testing
+
+    ln -s ../django-parltrack-meps/django\_parltrack\_meps .
+    ln -s ../django-parltrack-votes/django\_parltrack\_votes.
+    ln -s ../django-parltrack-votes-data/django\_parltrack\_votes\_data .
+
     vi testing/settings.py # here, set the database
-    # and add 'django_parltrack_votes_data' 'django_parltrack_votes' 'django_parltrack_meps_data'
+    # and add 'django_parltrack_votes_data' 'django_parltrack_votes' 'django_parltrack_meps'
     # to the list of installed apps
 
     python manage.py syncdb
