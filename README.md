@@ -20,7 +20,7 @@ For dev, this will look something like this:
 
     git clone git@github.com:Psycojoker/django-parltrack-votes-data.git
     git clone git@github.com:Psycojoker/django-parltrack-votes.git
-    git clone git@github.com:Psycojoker/django-parltrack-meps-data.git
+    git clone git@github.com:Psycojoker/django-parltrack-meps.git
 
     pip install -r django-parltrack-votes-data/requirements.txt
 
