@@ -1,6 +1,6 @@
 # -*- coding:Utf-8 -*-
 from django.db import models
-from django_parltrack_meps.models import MEP
+from parltrack_meps.models import MEP
 
 
 class Proposal(models.Model):

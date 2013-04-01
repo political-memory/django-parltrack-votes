@@ -11,9 +11,9 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.db import transaction
 
-from django_parltrack_meps.models import MEP
-from django_parltrack_votes_data.models import VotesData
-from django_parltrack_votes.models import Proposal, ProposalPart, Vote
+from parltrack_meps.models import MEP
+from parltrack_votes_data.models import VotesData
+from parltrack_votes.models import Proposal, ProposalPart, Vote
 
 
 class Command(BaseCommand):
