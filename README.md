@@ -29,7 +29,7 @@ For dev, this will look something like this:
     cd testing
 
     ln -s ../django-parltrack-meps/parltrack\_meps .
-    ln -s ../django-parltrack-votes/parltrack\_votes.
+    ln -s ../django-parltrack-votes/parltrack\_votes .
     ln -s ../django-parltrack-votes-data/parltrack\_votes\_data .
 
     vi testing/settings.py # here, set the database
