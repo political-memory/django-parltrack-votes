@@ -3,7 +3,9 @@ Introduction
 
 European part vote related code and models extracted from [memopol](https://memopol.lqdn.fr) [code base](https://gitorious.org/memopol2-0).
 
-This contains the models needed to work with Votes and also the script to match between MEPs and votes data.
+Votes data of the European Parliament importation (from [parltrack](https://parltrack.euwiki.org)) and models extracted from [memopol](https://memopol.lqdn.fr) [code base](https://gitorious.org/memopol2-0).
+
+This contains the models needed to work with Votes, the script to import if from parltrack and also the script to match between MEPs and votes data.
 
 Dependancies
 ============
@@ -18,7 +20,6 @@ For dev, this will look something like this:
     virtualenv ve
     source ve/bin/activate
 
-    git clone git@github.com:Psycojoker/django-parltrack-votes-data.git
     git clone git@github.com:Psycojoker/django-parltrack-votes.git
     git clone git@github.com:Psycojoker/django-parltrack-meps.git
 
@@ -30,10 +31,9 @@ For dev, this will look something like this:
 
     ln -s ../django-parltrack-meps/parltrack\_meps .
     ln -s ../django-parltrack-votes/parltrack\_votes .
-    ln -s ../django-parltrack-votes-data/parltrack\_votes\_data .
 
     vi testing/settings.py # here, set the database
-    # and add 'parltrack_votes_data' 'parltrack_votes' 'parltrack_meps'
+    # and add 'parltrack_votes' 'parltrack_meps'
     # to the list of installed apps
 
     python manage.py syncdb
