@@ -24,7 +24,9 @@ import pytz
 from os.path import join
 from json import loads, dumps
 from dateutil.parser import parse
+from datetime import datetime
 import urllib
+import ipdb
 
 from django.db import transaction, connection, reset_queries
 from django.utils.timezone import make_aware
@@ -63,6 +65,7 @@ class Command(BaseCommand):
         print "read file"
         current_json = ""
         a = 1
+        start = datetime.now()
         with transaction.commit_on_success():
         # I need to parse the json file by hand, otherwise this eat way to much memory
             for i in open(json_file, "r"):
@@ -73,7 +76,8 @@ class Command(BaseCommand):
                     # print "end"
                     current_json += "\n}"
                     vote = loads(current_json)
-                    create_in_db(vote)
+                    with ipdb.launch_ipdb_on_exception():
+                        create_in_db(vote)
                     reset_queries() # to avoid memleaks in debug mode
                     current_json = ""
                     sys.stdout.write("%s\r" % a)
@@ -84,13 +88,14 @@ class Command(BaseCommand):
                 else:
                     current_json += i
             sys.stdout.write("\n")
+        print datetime.now() - start
 
 def create_in_db(vote):
     proposal_name = vote.get("report", vote["title"])
     vote_datetime = make_aware(parse(vote["ts"]), pytz.timezone("Europe/Brussels"))
     subject = "".join(vote["title"].split("-")[:-1])
     proposal = get_proposal(proposal_name)
-    part = vote["issue_type"]
+    part = vote.get("issue_type", proposal_name)
 
     r = ProposalPart.objects.create(
         datetime=vote_datetime,
@@ -99,11 +104,10 @@ def create_in_db(vote):
         proposal=proposal
     )
 
-    print vote
-    import ipdb
-    with ipdb.launch_ipdb_on_exception(): 
-        choices = (('Against', 'against'), ('For', 'for'), ('Abstain', 'abstention'))
-        for key, choice in choices:
+    #print vote
+    choices = (('Against', 'against'), ('For', 'for'), ('Abstain', 'abstention'))
+    for key, choice in choices:
+        if key in vote:
             for group in vote[key]["groups"]:
                 for mep in group["votes"]:
                     #in_db_mep = find_matching_mep_in_db(mep)
@@ -112,7 +116,7 @@ def create_in_db(vote):
                     else:
                         mep_name = mep
                     group_name = group['group']
-                    print "Create vote for", mep_name
+                    #print "Create vote for", mep_name
 
                     Vote.objects.create(choice=choice, proposal_part=r, raw_mep=mep_name, raw_group=group_name, name=proposal)
 
