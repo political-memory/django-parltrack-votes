@@ -5,7 +5,6 @@ import sys
 import json
 
 from urllib import urlopen
-from datetime import datetime, time
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
@@ -29,13 +28,11 @@ class Command(BaseCommand):
             link_mep(proposal_part_id)
 
 
-
 def link_mep(proposal_part_id):
     proposal_part = ProposalPart.objects.get(id=proposal_part_id)
     for vote in proposal_part.vote_set.all():
         vote.mep = find_matching_mep_in_db(vote.raw_mep)
         vote.save()
-
 
 
 def find_matching_mep_in_db(mep):
