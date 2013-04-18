@@ -47,32 +47,35 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         json_file = retrieve_json()
         print "read file"
-        current_json = ""
         a = 1
         start = datetime.now()
         with transaction.commit_on_success():
-        # I need to parse the json file by hand, otherwise this eat way to much memory
-            for i in open(json_file, "r"):
-                if i in ("[{\n", "{\n"):
-                    # print "begin doc"
-                    current_json += "{\n"
-                elif "}\n" == i:
-                    # print "end"
-                    current_json += "\n}"
-                    vote = loads(current_json)
-                    with ipdb.launch_ipdb_on_exception():
-                        create_in_db(vote)
-                    reset_queries() # to avoid memleaks in debug mode
-                    current_json = ""
-                    sys.stdout.write("%s\r" % a)
-                    sys.stdout.flush()
-                    a += 1
-                elif i == ",\n":
-                    pass
-                else:
-                    current_json += i
-            sys.stdout.write("\n")
+            for vote in json_generator(json_file):
+                with ipdb.launch_ipdb_on_exception():
+                    create_in_db(vote)
+                reset_queries() # to avoid memleaks in debug mode
+                sys.stdout.write("%s\r" % a)
+                sys.stdout.flush()
+                a += 1
         print datetime.now() - start
+
+def json_generator(json_file):
+    # I need to parse the json file by hand, otherwise this eat way to much memory
+    current_json = ""
+    for i in open(json_file, "r"):
+        if i in ("[{\n", "{\n"):
+            # print "begin doc"
+            current_json += "{\n"
+        elif "}\n" == i:
+            # print "end"
+            current_json += "\n}"
+            yield loads(current_json)
+            current_json = ""
+        elif i == ",\n":
+            pass
+        else:
+            current_json += i
+    sys.stdout.write("\n")
 
 def retrieve_json():
     if os.system("which unxz > /dev/null") != 0:
