@@ -8,12 +8,10 @@ from urllib import urlopen
 from datetime import datetime, time
 
 from django.core.management.base import BaseCommand
-from django.conf import settings
 from django.db import transaction
 
 from parltrack_meps.models import MEP
-from parltrack_votes.models import VotesData
-from parltrack_votes.models import Proposal, ProposalPart, Vote
+from parltrack_votes.models import ProposalPart
 
 
 class Command(BaseCommand):
@@ -21,51 +19,26 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if not args:
-            print >>sys.stderr, "Usage: %s <votes_data id>" % __file__
+            print >>sys.stderr, "Usage: %s <proposal_part id>" % __file__
             sys.exit(1)
 
-        votes_data_id = args[0]
+        proposal_part_id = args[0]
 
         with transaction.commit_on_success():
-            create_recommendation(votes_data_id)
+
+            link_mep(proposal_part_id)
 
 
 
-def create_recommendation(votes_data_id):
-    votes_data = VotesData.objects.get(id=votes_data_id)
-    data = json.loads(votes_data.data)
+def link_mep(proposal_part_id):
+    proposal_part = ProposalPart.objects.get(id=proposal_part_id)
+    for vote in proposal_part.vote_set.all():
+        vote.mep = find_matching_mep_in_db(vote.raw_mep)
+        vote.save()
 
-    # XXX dunno if we still want that
-    # ProposalPart.objects.filter(datetime=datetime.combine(votes_data.date, time()),
-                                  # subject="".join(votes_data.title.split("-")[:-1]),
-                                  # part=data["issue_type"]).delete()
-
-    proposal = get_proposal(votes_data.proposal_name)
-    print "Creating recommendation"
-    r = ProposalPart.objects.create(datetime=datetime.combine(votes_data.date, time()),
-                                  subject="".join(votes_data.title.split("-")[:-1]),
-                                  part=data["issue_type"],
-                                  proposal=proposal)
-
-    # clean old votes
-    # XXX dunno if we still want this
-    #Vote.objects.filter(recommendation=r).delete()
-
-    choices = (('Against', 'against'), ('For', 'for'), ('Abstain', 'abstention'))
-    for key, choice in choices:
-        for group in data[key]["groups"]:
-            for mep in group["votes"]:
-                in_db_mep = find_matching_mep_in_db(mep)
-                print "Create vote for", in_db_mep.first_name, in_db_mep.last_name
-                Vote.objects.create(choice=choice, proposal_part=r, mep=in_db_mep, name=votes_data.proposal_name)
-
-    sys.stdout.write("\n")
-    votes_data.imported = True
-    votes_data.save()
 
 
 def find_matching_mep_in_db(mep):
-    mep = mep["orig"]
     mep = mep.replace(u"ß", "SS")
     mep = mep.replace("(The Earl of) ", "")
     try:
