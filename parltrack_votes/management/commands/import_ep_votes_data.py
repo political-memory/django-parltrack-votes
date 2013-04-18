@@ -42,7 +42,7 @@ def get_proposal(proposal_name):
 
 
 class Command(BaseCommand):
-    help = 'Import vote data of the European Parliament, this is needed to be able to create voting recommendations'
+    help = 'Import vote data of the European Parliament, this is needed to be able to create voting recommendations. If given a file in arg use it instead download it from parltrack'
 
     def handle(self, *args, **options):
         if args:
@@ -53,7 +53,7 @@ class Command(BaseCommand):
         print "read file", json_file
         start = datetime.now()
         with transaction.commit_on_success():
-            for a, vote in enumerate(json_generator(json_file)):
+            for a, vote in enumerate(json_parser_generator(json_file)):
                 with ipdb.launch_ipdb_on_exception():
                     create_in_db(vote)
                 reset_queries() # to avoid memleaks in debug mode
@@ -61,8 +61,10 @@ class Command(BaseCommand):
                 sys.stdout.flush()
         print datetime.now() - start
 
-def json_generator(json_file):
-    # I need to parse the json file by hand, otherwise this eat way to much memory
+def json_parser_generator(json_file):
+    """Parse the json and yield one parltrack vote at the time
+     I need to parse the json file by hand, otherwise this eat way too much memory
+    """
     current_json = ""
     for i in open(json_file, "r"):
         if i in ("[{\n", "{\n"):
@@ -80,6 +82,7 @@ def json_generator(json_file):
     sys.stdout.write("\n")
 
 def retrieve_json():
+    "Download and extract json file from parltrack"
     if os.system("which unxz > /dev/null") != 0:
         raise Exception("XZ binary missing, please install xz")
     print "Clean old downloaded files"
