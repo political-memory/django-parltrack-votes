@@ -45,8 +45,12 @@ class Command(BaseCommand):
     help = 'Import vote data of the European Parliament, this is needed to be able to create voting recommendations'
 
     def handle(self, *args, **options):
-        json_file = retrieve_json()
-        print "read file"
+        if args:
+            json_file = args[0]
+        else:
+            json_file = retrieve_json()
+
+        print "read file", json_file
         start = datetime.now()
         with transaction.commit_on_success():
             for a, vote in enumerate(json_generator(json_file)):
