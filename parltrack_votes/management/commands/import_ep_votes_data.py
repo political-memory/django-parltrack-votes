@@ -99,6 +99,7 @@ def retrieve_json():
     return json_file
 
 def create_in_db(vote):
+    cur = connection.cursor()
     proposal_name = vote.get("report", vote["title"])
     vote_datetime = make_aware(parse(vote["ts"]), pytz.timezone("Europe/Brussels"))
     subject = "".join(vote["title"].split("-")[:-1])
@@ -113,6 +114,7 @@ def create_in_db(vote):
     )
 
     #print vote
+    args = []
     choices = (('Against', 'against'), ('For', 'for'), ('Abstain', 'abstention'))
     for key, choice in choices:
         if key in vote:
@@ -126,6 +128,7 @@ def create_in_db(vote):
                     group_name = group['group']
                     #print "Create vote for", mep_name
 
-                    Vote.objects.create(choice=choice, proposal_part=r, raw_mep=mep_name, raw_group=group_name, name=proposal)
+                    args.append((choice, proposal_name, r.id, mep_name, group_name))
+    cur.executemany("INSERT INTO parltrack_votes_vote (choice, name, proposal_part_id, raw_mep, raw_group) values (%s, %s, %s, %s, %s)", args)
 
 # vim:set shiftwidth=4 tabstop=4 expandtab:
