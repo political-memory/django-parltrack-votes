@@ -12,7 +12,7 @@ from django.conf import settings
 from django.db import transaction
 
 from parltrack_meps.models import MEP
-from parltrack_votes_data.models import VotesData
+from parltrack_votes.models import VotesData
 from parltrack_votes.models import Proposal, ProposalPart, Vote
 
 
