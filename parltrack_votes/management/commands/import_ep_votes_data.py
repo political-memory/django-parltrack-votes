@@ -45,19 +45,7 @@ class Command(BaseCommand):
     help = 'Import vote data of the European Parliament, this is needed to be able to create voting recommendations'
 
     def handle(self, *args, **options):
-        if os.system("which unxz > /dev/null") != 0:
-            raise Exception("XZ binary missing, please install xz")
-        print "Clean old downloaded files"
-        json_file = join("/tmp", "ep_votes.json")
-        xz_file = join("/tmp", "ep_votes.json.xz")
-        if os.path.exists(json_file):
-            os.remove(json_file)
-        if os.path.exists(xz_file):
-            os.remove(xz_file)
-        print "Download vote data from parltrack"
-        urllib.urlretrieve('http://parltrack.euwiki.org/dumps/ep_votes.json.xz', xz_file)
-        print "unxz it"
-        os.system("unxz %s" % xz_file)
+        json_file = retrieve_json()
         print "read file"
         current_json = ""
         a = 1
@@ -85,6 +73,22 @@ class Command(BaseCommand):
                     current_json += i
             sys.stdout.write("\n")
         print datetime.now() - start
+
+def retrieve_json():
+    if os.system("which unxz > /dev/null") != 0:
+        raise Exception("XZ binary missing, please install xz")
+    print "Clean old downloaded files"
+    json_file = join("/tmp", "ep_votes.json")
+    xz_file = join("/tmp", "ep_votes.json.xz")
+    if os.path.exists(json_file):
+        os.remove(json_file)
+    if os.path.exists(xz_file):
+        os.remove(xz_file)
+    print "Download vote data from parltrack"
+    urllib.urlretrieve('http://parltrack.euwiki.org/dumps/ep_votes.json.xz', xz_file)
+    print "unxz it"
+    os.system("unxz %s" % xz_file)
+    return json_file
 
 def create_in_db(vote):
     proposal_name = vote.get("report", vote["title"])
