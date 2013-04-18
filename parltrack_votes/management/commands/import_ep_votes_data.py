@@ -32,7 +32,7 @@ from django.db import transaction, connection, reset_queries
 from django.utils.timezone import make_aware
 from django.core.management.base import BaseCommand
 
-from parltrack_votes.models import Proposal, ProposalPart, Vote, VotesData
+from parltrack_votes.models import Proposal, ProposalPart, Vote
 
 def get_proposal(proposal_name):
     proposal = Proposal.objects.filter(title=proposal_name)
@@ -58,10 +58,6 @@ class Command(BaseCommand):
         urllib.urlretrieve('http://parltrack.euwiki.org/dumps/ep_votes.json.xz', xz_file)
         print "unxz it"
         os.system("unxz %s" % xz_file)
-        print "cleaning old votes data..."
-        connection.cursor().execute("DELETE FROM %s" % VotesData._meta.db_table)
-        transaction.commit_unless_managed()
-        print VotesData.objects.count()
         print "read file"
         current_json = ""
         a = 1
