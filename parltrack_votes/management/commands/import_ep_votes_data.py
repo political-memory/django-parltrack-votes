@@ -47,16 +47,14 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         json_file = retrieve_json()
         print "read file"
-        a = 1
         start = datetime.now()
         with transaction.commit_on_success():
-            for vote in json_generator(json_file):
+            for a, vote in enumerate(json_generator(json_file)):
                 with ipdb.launch_ipdb_on_exception():
                     create_in_db(vote)
                 reset_queries() # to avoid memleaks in debug mode
                 sys.stdout.write("%s\r" % a)
                 sys.stdout.flush()
-                a += 1
         print datetime.now() - start
 
 def json_generator(json_file):
