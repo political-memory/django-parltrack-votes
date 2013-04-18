@@ -30,7 +30,13 @@ from django.db import transaction, connection, reset_queries
 from django.utils.timezone import make_aware
 from django.core.management.base import BaseCommand
 
-from parltrack_votes.models import VotesData
+from parltrack_votes.models import Proposal, ProposalPart, Vote, VotesData
+
+def get_proposal(proposal_name):
+    proposal = Proposal.objects.filter(title=proposal_name)
+    if proposal:
+        return proposal[0]
+    return Proposal.objects.create(title=proposal_name)
 
 
 class Command(BaseCommand):
@@ -67,10 +73,7 @@ class Command(BaseCommand):
                     # print "end"
                     current_json += "\n}"
                     vote = loads(current_json)
-                    VotesData.objects.create(proposal_name=vote.get("report", vote["title"]),
-                                            title=vote["title"],
-                                            data=dumps(vote, indent=4),
-                                            date=make_aware(parse(vote["ts"]), pytz.timezone("Europe/Brussels"))),
+                    create_in_db(vote)
                     reset_queries() # to avoid memleaks in debug mode
                     current_json = ""
                     sys.stdout.write("%s\r" % a)
@@ -81,5 +84,36 @@ class Command(BaseCommand):
                 else:
                     current_json += i
             sys.stdout.write("\n")
+
+def create_in_db(vote):
+    proposal_name = vote.get("report", vote["title"])
+    vote_datetime = make_aware(parse(vote["ts"]), pytz.timezone("Europe/Brussels"))
+    subject = "".join(vote["title"].split("-")[:-1])
+    proposal = get_proposal(proposal_name)
+    part = vote["issue_type"]
+
+    r = ProposalPart.objects.create(
+        datetime=vote_datetime,
+        subject=subject,
+        part=part,
+        proposal=proposal
+    )
+
+    print vote
+    import ipdb
+    with ipdb.launch_ipdb_on_exception(): 
+        choices = (('Against', 'against'), ('For', 'for'), ('Abstain', 'abstention'))
+        for key, choice in choices:
+            for group in vote[key]["groups"]:
+                for mep in group["votes"]:
+                    #in_db_mep = find_matching_mep_in_db(mep)
+                    if isinstance(mep, dict):
+                        mep_name = mep['orig']
+                    else:
+                        mep_name = mep
+                    group_name = group['group']
+                    print "Create vote for", mep_name
+
+                    Vote.objects.create(choice=choice, proposal_part=r, raw_mep=mep_name, raw_group=group_name, name=proposal)
 
 # vim:set shiftwidth=4 tabstop=4 expandtab:

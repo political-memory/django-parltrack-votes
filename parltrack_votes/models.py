@@ -42,6 +42,8 @@ class Vote(models.Model):
     name = models.CharField(max_length=127)
     proposal_part = models.ForeignKey(ProposalPart)
     mep = models.ForeignKey(MEP, null=True)
+    raw_mep = models.CharField(max_length=255)
+    raw_group = models.CharField(max_length=255)
 
     class Meta:
         ordering = ["choice"]

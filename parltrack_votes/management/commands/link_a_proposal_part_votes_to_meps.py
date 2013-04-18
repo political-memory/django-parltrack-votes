@@ -30,12 +30,6 @@ class Command(BaseCommand):
             create_recommendation(votes_data_id)
 
 
-def get_proposal(proposal_name):
-    proposal = Proposal.objects.filter(title=proposal_name)
-    if proposal:
-        return proposal[0]
-    return Proposal.objects.create(title=proposal_name)
-
 
 def create_recommendation(votes_data_id):
     votes_data = VotesData.objects.get(id=votes_data_id)
