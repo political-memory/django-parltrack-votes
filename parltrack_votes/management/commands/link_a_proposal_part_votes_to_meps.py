@@ -1,12 +1,10 @@
 # -*- coding:Utf-8 -*-
-
 import re
-import sys
 import json
 
 from urllib import urlopen
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from parltrack_meps.models import MEP
@@ -15,16 +13,14 @@ from parltrack_votes.models import ProposalPart
 
 class Command(BaseCommand):
     help = 'Create a voting recommandation, WARNING: due to the nature of the data, there is sadly non-negligible chances that this command will fail'
+    args= "<proposal_part_id>"
 
     def handle(self, *args, **options):
         if not args:
-            print >>sys.stderr, "Usage: %s <proposal_part id>" % __file__
-            sys.exit(1)
+            raise CommandError("Usage: %s <proposal_part id>" % __file__)
 
         proposal_part_id = args[0]
-
         with transaction.commit_on_success():
-
             link_mep(proposal_part_id)
 
 
