@@ -1,6 +1,7 @@
 # -*- coding:Utf-8 -*-
 import re
 import json
+from functool import partial
 
 from urllib import urlopen
 
@@ -30,24 +31,25 @@ def link_mep(proposal_part_id):
         vote.mep = find_matching_mep_in_db(vote.raw_mep)
         vote.save()
 
-
 def find_matching_mep_in_db(mep):
     mep = mep.replace(u"ß", "SS")
     mep = mep.replace("(The Earl of) ", "")
+
+    mep_filter = partial(MEP.objects.filter, active=True)
     try:
-        representative = MEP.objects.filter(active=True, last_name=mep)
+        representative = mep_filter(last_name=mep)
         if not representative:
-            representative = MEP.objects.filter(active=True, last_name__iexact=mep)
+            representative = mep_filter(last_name__iexact=mep)
         if not representative:
-            representative = MEP.objects.filter(active=True, last_name__iexact=re.sub("^DE ", "", mep.upper()))
+            representative = mep_filter(last_name__iexact=re.sub("^DE ", "", mep.upper()))
         if not representative:
-            representative = MEP.objects.filter(active=True, last_name__contains=mep.upper())
+            representative = mep_filter(last_name__contains=mep.upper())
         if not representative:
-            representative = MEP.objects.filter(active=True, full_name__contains=re.sub("^MC", "Mc", mep.upper()))
+            representative = mep_filter(full_name__contains=re.sub("^MC", "Mc", mep.upper()))
         if not representative:
-            representative = MEP.objects.filter(active=True, full_name__icontains=mep)
+            representative = mep_filter(full_name__icontains=mep)
         if not representative:
-            representative = [dict([("%s %s" % (x.last_name.lower(), x.first_name.lower()), x) for x in MEP.objects.filter(active=True)])[mep.lower()]]
+            representative = [dict([("%s %s" % (x.last_name.lower(), x.first_name.lower()), x) for x in mep_filter()])[mep.lower()]]
         representative = representative[0]
     except Exception as e:
         print "WARNING: failed to get mep using internal db, fall back on parltrack (exception: %s)" % e
