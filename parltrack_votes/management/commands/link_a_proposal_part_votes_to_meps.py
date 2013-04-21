@@ -36,27 +36,29 @@ def find_matching_mep_in_db(mep):
     mep = mep.replace("(The Earl of) ", "")
 
     mep_filter = partial(MEP.objects.filter, active=True)
-    try:
-        representative = mep_filter(last_name=mep)
-        if not representative:
-            representative = mep_filter(last_name__iexact=mep)
-        if not representative:
-            representative = mep_filter(last_name__iexact=re.sub("^DE ", "", mep.upper()))
-        if not representative:
-            representative = mep_filter(last_name__contains=mep.upper())
-        if not representative:
-            representative = mep_filter(full_name__contains=re.sub("^MC", "Mc", mep.upper()))
-        if not representative:
-            representative = mep_filter(full_name__icontains=mep)
-        if not representative:
-            representative = [dict([("%s %s" % (x.last_name.lower(), x.first_name.lower()), x) for x in mep_filter()])[mep.lower()]]
-        representative = representative[0]
-    except Exception as e:
-        print "WARNING: failed to get mep using internal db, fall back on parltrack (exception: %s)" % e
-        print "http://parltrack.euwiki.org/mep/%s?format=json" % (mep.encode("Utf-8"))
-        mep_ep_id = json.loads(urlopen("http://parltrack.euwiki.org/mep/%s?format=json" % (mep.encode("Utf-8"))).read())["UserID"]
-        print mep_ep_id, mep, json.loads(urlopen("http://parltrack.euwiki.org/mep/%s?format=json" % (mep.encode("Utf-8"))).read())["Name"]["full"]
-        representative = MEP.objects.get(ep_id=mep_ep_id).representative_ptr
+
+    representative = mep_filter(last_name=mep)
+    if not representative:
+        representative = mep_filter(last_name__iexact=mep)
+    if not representative:
+        representative = mep_filter(last_name__iexact=re.sub("^DE ", "", mep.upper()))
+    if not representative:
+        representative = mep_filter(last_name__contains=mep.upper())
+    if not representative:
+        representative = mep_filter(full_name__contains=re.sub("^MC", "Mc", mep.upper()))
+    if not representative:
+        representative = mep_filter(full_name__icontains=mep)
+    if not representative:
+        representative = [dict([("%s %s" % (x.last_name.lower(), x.first_name.lower()), x) for x in mep_filter()])[mep.lower()]]
+
+    if representative:
+        return representative[0]
+
+    print "WARNING: failed to get mep using internal db, fall back on parltrack"
+    print "http://parltrack.euwiki.org/mep/%s?format=json" % (mep.encode("Utf-8"))
+    mep_ep_id = json.loads(urlopen("http://parltrack.euwiki.org/mep/%s?format=json" % (mep.encode("Utf-8"))).read())["UserID"]
+    print mep_ep_id, mep, json.loads(urlopen("http://parltrack.euwiki.org/mep/%s?format=json" % (mep.encode("Utf-8"))).read())["Name"]["full"]
+    representative = MEP.objects.get(ep_id=mep_ep_id).representative_ptr
     return representative
 
 
