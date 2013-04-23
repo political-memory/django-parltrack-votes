@@ -22,7 +22,7 @@ import os
 import sys
 import pytz
 from os.path import join
-from json import loads, dumps
+from json import loads
 from dateutil.parser import parse
 from datetime import datetime
 import urllib
@@ -32,7 +32,7 @@ from django.db import transaction, connection, reset_queries
 from django.utils.timezone import make_aware
 from django.core.management.base import BaseCommand
 
-from parltrack_votes.models import Proposal, ProposalPart, Vote
+from parltrack_votes.models import Proposal, ProposalPart
 
 def get_proposal(proposal_name):
     proposal = Proposal.objects.filter(title=proposal_name)
