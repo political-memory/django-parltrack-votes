@@ -1,7 +1,7 @@
 # -*- coding:Utf-8 -*-
 import re
 import json
-from functool import partial
+from functools import partial
 
 from urllib import urlopen
 
