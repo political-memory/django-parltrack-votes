@@ -1,9 +1,7 @@
 # -*- coding:Utf-8 -*-
 import re
-import json
 from functools import partial
 
-from urllib import urlopen
 
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
