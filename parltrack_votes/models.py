@@ -1,8 +1,6 @@
 # -*- coding:Utf-8 -*-
 from django.db import models
 from parltrack_meps.models import MEP
-import json
-
 
 class Proposal(models.Model):
     title = models.CharField(max_length=255, unique=True)
