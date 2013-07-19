@@ -21,9 +21,9 @@
 import os
 import sys
 import pytz
+import ijson
 import urllib
 from os.path import join
-from json import loads
 from dateutil.parser import parse
 from datetime import datetime
 
@@ -58,28 +58,16 @@ class Command(BaseCommand):
                 reset_queries()  # to avoid memleaks in debug mode
                 sys.stdout.write("%s\r" % a)
                 sys.stdout.flush()
-        print datetime.now() - start
         sys.stdout.write("\n")
+        print datetime.now() - start
 
 
 def json_parser_generator(json_file):
     """Parse the json and yield one parltrack vote at the time
      I need to parse the json file by hand, otherwise this eat way too much memory
     """
-    current_json = ""
-    for i in open(json_file, "r"):
-        if i in ("[{\n", "{\n"):
-            # print "begin doc"
-            current_json += "{\n"
-        elif "}\n" == i:
-            # print "end"
-            current_json += "\n}"
-            yield loads(current_json)
-            current_json = ""
-        elif i == ",\n":
-            pass
-        else:
-            current_json += i
+    for item in ijson.items(open(json_file), 'item'):
+        yield item
 
 
 def retrieve_json():
