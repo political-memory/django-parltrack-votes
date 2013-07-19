@@ -26,13 +26,13 @@ from os.path import join
 from json import loads
 from dateutil.parser import parse
 from datetime import datetime
-import ipdb
 
 from django.db import transaction, connection, reset_queries
 from django.utils.timezone import make_aware
 from django.core.management.base import BaseCommand
 
 from parltrack_votes.models import Proposal, ProposalPart
+
 
 def get_proposal(proposal_name):
     proposal = Proposal.objects.filter(title=proposal_name)
@@ -54,9 +54,8 @@ class Command(BaseCommand):
         start = datetime.now()
         with transaction.commit_on_success():
             for a, vote in enumerate(json_parser_generator(json_file)):
-                with ipdb.launch_ipdb_on_exception():
-                    create_in_db(vote)
-                reset_queries() # to avoid memleaks in debug mode
+                create_in_db(vote)
+                reset_queries()  # to avoid memleaks in debug mode
                 sys.stdout.write("%s\r" % a)
                 sys.stdout.flush()
         print datetime.now() - start
