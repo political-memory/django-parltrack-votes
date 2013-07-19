@@ -115,20 +115,20 @@ def create_in_db(vote):
         proposal=proposal
     )
 
-    #print vote
+    # print vote
     args = []
     choices = (('Against', 'against'), ('For', 'for'), ('Abstain', 'abstention'))
     for key, choice in choices:
         if key in vote:
             for group in vote[key]["groups"]:
                 for mep in group["votes"]:
-                    #in_db_mep = find_matching_mep_in_db(mep)
+                    # in_db_mep = find_matching_mep_in_db(mep)
                     if isinstance(mep, dict):
                         mep_name = mep['orig']
                     else:
                         mep_name = mep
                     group_name = group['group']
-                    #print "Create vote for", mep_name
+                    # print "Create vote for", mep_name
 
                     args.append((choice, proposal_name, r.id, mep_name, group_name))
     cur.executemany("INSERT INTO parltrack_votes_vote (choice, name, proposal_part_id, raw_mep, raw_group) values (%s, %s, %s, %s, %s)", args)
