@@ -59,6 +59,8 @@ class Command(BaseCommand):
                 sys.stdout.write("%s\r" % a)
                 sys.stdout.flush()
         print datetime.now() - start
+        sys.stdout.write("\n")
+
 
 def json_parser_generator(json_file):
     """Parse the json and yield one parltrack vote at the time
@@ -78,7 +80,7 @@ def json_parser_generator(json_file):
             pass
         else:
             current_json += i
-    sys.stdout.write("\n")
+
 
 def retrieve_json():
     "Download and extract json file from parltrack"
@@ -96,6 +98,7 @@ def retrieve_json():
     print "unxz it"
     os.system("unxz %s" % xz_file)
     return json_file
+
 
 def create_in_db(vote):
     cur = connection.cursor()
