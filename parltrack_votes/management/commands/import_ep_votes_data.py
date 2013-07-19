@@ -21,11 +21,11 @@
 import os
 import sys
 import pytz
+import urllib
 from os.path import join
 from json import loads
 from dateutil.parser import parse
 from datetime import datetime
-import urllib
 import ipdb
 
 from django.db import transaction, connection, reset_queries
