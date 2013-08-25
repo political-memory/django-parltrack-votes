@@ -16,7 +16,7 @@ class Proposal(models.Model):
         return self._date
 
     def __unicode__(self):
-        return self.title
+        return "%s [%s]" % (self.title if self.title else "no title", self.code_name)
 
     class Meta:
         ordering = ('-_date', )
