@@ -46,6 +46,7 @@ class Vote(models.Model):
 
     class Meta:
         ordering = ["choice"]
+        unique_together = ("proposal_part", "mep")
 
     def __unicode__(self):
         return '%s (%s)' % (self.name, self.choice)
