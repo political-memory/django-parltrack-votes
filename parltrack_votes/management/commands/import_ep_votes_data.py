@@ -34,11 +34,11 @@ from django.core.management.base import BaseCommand
 from parltrack_votes.models import Proposal, ProposalPart
 
 
-def get_proposal(proposal_name):
-    proposal = Proposal.objects.filter(title=proposal_name)
+def get_proposal(proposal_name, proposal_title):
+    proposal = Proposal.objects.filter(code_name=proposal_name)
     if proposal:
         return proposal[0]
-    return Proposal.objects.create(title=proposal_name)
+    return Proposal.objects.create(code_name=proposal_name, title=proposal_title)
 
 
 class Command(BaseCommand):
@@ -93,7 +93,7 @@ def create_in_db(vote):
     proposal_name = vote.get("report", vote["title"])
     vote_datetime = make_aware(parse(vote["ts"]), pytz.timezone("Europe/Brussels"))
     subject = "".join(vote["title"].split("-")[:-1])
-    proposal = get_proposal(proposal_name)
+    proposal = get_proposal(proposal_name, vote.get("eptitle"))
     part = vote.get("issue_type", proposal_name)
 
     r = ProposalPart.objects.create(

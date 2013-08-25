@@ -3,7 +3,8 @@ from django.db import models
 from parltrack_meps.models import MEP
 
 class Proposal(models.Model):
-    title = models.CharField(max_length=255, unique=True)
+    title = models.TextField(null=True)
+    code_name =  models.CharField(max_length=255, unique=True)
     ponderation = models.IntegerField(default=1)
     _date = models.DateField(default=None, null=True, blank=True)
 
