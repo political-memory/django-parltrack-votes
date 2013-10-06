@@ -1,6 +1,6 @@
 # -*- coding:Utf-8 -*-
 
-# This file is part of django-parltrack-votes-data.
+# This file is part of django-parltrack-votes.
 #
 # django-parltrack-votes-data is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 # See the GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU General Affero Public
-# License along with Foobar.
+# License along with django-parltrack-votes.
 # If not, see <http://www.gnu.org/licenses/>.
 #
 # Copyright (C) 2013  Laurent Peuch <cortex@worlddomination.be>
