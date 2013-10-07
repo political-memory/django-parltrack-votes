@@ -52,11 +52,14 @@ class Command(BaseCommand):
 
         print "read file", json_file
         start = datetime.now()
+        number_of_new = 0
         with transaction.commit_on_success():
             for a, vote in enumerate(json_parser_generator(json_file)):
-                create_if_not_present_in_db(vote)
+                new = create_if_not_present_in_db(vote)
+                if new:
+                    number_of_new += 1
                 reset_queries()  # to avoid memleaks in debug mode
-                sys.stdout.write("%s\r" % a)
+                sys.stdout.write("%s (%s new)\r" % (a, number_of_new))
                 sys.stdout.flush()
         sys.stdout.write("\n")
         print datetime.now() - start
@@ -98,7 +101,7 @@ def create_if_not_present_in_db(vote):
 
     if ProposalPart.objects.filter(datetime=vote_datetime, subject=subject, part=part, proposal=proposal):
         assert len(ProposalPart.objects.filter(datetime=vote_datetime, subject=subject, part=part, proposal=proposal)) == 1
-        return
+        return False
 
     r = ProposalPart.objects.create(
         datetime=vote_datetime,
@@ -124,5 +127,6 @@ def create_if_not_present_in_db(vote):
 
                     args.append((choice, proposal_name, r.id, mep_name, group_name))
     cur.executemany("INSERT INTO parltrack_votes_vote (choice, name, proposal_part_id, raw_mep, raw_group) values (%s, %s, %s, %s, %s)", args)
+    return True
 
 # vim:set shiftwidth=4 tabstop=4 expandtab:
