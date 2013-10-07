@@ -96,6 +96,10 @@ def create_in_db(vote):
     proposal = get_proposal(proposal_name, vote.get("eptitle"))
     part = vote.get("issue_type", proposal_name)
 
+    if ProposalPart.objects.filter(datetime=vote_datetime, subject=subject, part=part, proposal=proposal):
+        assert len(ProposalPart.objects.filter(datetime=vote_datetime, subject=subject, part=part, proposal=proposal)) == 1
+        return
+
     r = ProposalPart.objects.create(
         datetime=vote_datetime,
         subject=subject,
