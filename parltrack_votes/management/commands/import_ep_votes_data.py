@@ -54,7 +54,7 @@ class Command(BaseCommand):
         start = datetime.now()
         with transaction.commit_on_success():
             for a, vote in enumerate(json_parser_generator(json_file)):
-                create_in_db(vote)
+                create_if_not_present_in_db(vote)
                 reset_queries()  # to avoid memleaks in debug mode
                 sys.stdout.write("%s\r" % a)
                 sys.stdout.flush()
@@ -88,7 +88,7 @@ def retrieve_json():
     return json_file
 
 
-def create_in_db(vote):
+def create_if_not_present_in_db(vote):
     cur = connection.cursor()
     proposal_name = vote.get("report", vote["title"])
     vote_datetime = make_aware(parse(vote["ts"]), pytz.timezone("Europe/Brussels"))
