@@ -1,6 +1,6 @@
 # -*- coding:Utf-8 -*-
 
-# This file is part of django-parltrack-votes-data.
+# This file is part of django-parltrack-votes.
 #
 # django-parltrack-votes-data is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 # See the GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU General Affero Public
-# License along with Foobar.
+# License along with django-parltrack-votes.
 # If not, see <http://www.gnu.org/licenses/>.
 #
 # Copyright (C) 2013  Laurent Peuch <cortex@worlddomination.be>
@@ -52,11 +52,14 @@ class Command(BaseCommand):
 
         print "read file", json_file
         start = datetime.now()
+        number_of_new = 0
         with transaction.commit_on_success():
             for a, vote in enumerate(json_parser_generator(json_file)):
-                create_in_db(vote)
+                new = create_if_not_present_in_db(vote)
+                if new:
+                    number_of_new += 1
                 reset_queries()  # to avoid memleaks in debug mode
-                sys.stdout.write("%s\r" % a)
+                sys.stdout.write("%s (%s new)\r" % (a, number_of_new))
                 sys.stdout.flush()
         sys.stdout.write("\n")
         print datetime.now() - start
@@ -88,13 +91,17 @@ def retrieve_json():
     return json_file
 
 
-def create_in_db(vote):
+def create_if_not_present_in_db(vote):
     cur = connection.cursor()
     proposal_name = vote.get("report", vote["title"])
     vote_datetime = make_aware(parse(vote["ts"]), pytz.timezone("Europe/Brussels"))
     subject = "".join(vote["title"].split("-")[:-1])
     proposal = get_proposal(proposal_name, vote.get("eptitle"))
     part = vote.get("issue_type", proposal_name)
+
+    if ProposalPart.objects.filter(datetime=vote_datetime, subject=subject, part=part, proposal=proposal):
+        assert len(ProposalPart.objects.filter(datetime=vote_datetime, subject=subject, part=part, proposal=proposal)) == 1
+        return False
 
     r = ProposalPart.objects.create(
         datetime=vote_datetime,
@@ -120,5 +127,6 @@ def create_in_db(vote):
 
                     args.append((choice, proposal_name, r.id, mep_name, group_name))
     cur.executemany("INSERT INTO parltrack_votes_vote (choice, name, proposal_part_id, raw_mep, raw_group) values (%s, %s, %s, %s, %s)", args)
+    return True
 
 # vim:set shiftwidth=4 tabstop=4 expandtab:
