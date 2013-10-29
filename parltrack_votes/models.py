@@ -37,7 +37,7 @@ class ProposalPart(models.Model):
 
 class Vote(models.Model):
     choice = models.CharField(max_length=15, choices=((u'for', u'for'), (u'against', u'against'), (u'abstention', u'abstention'), (u'absent', u'absent')))
-    name = models.CharField(max_length=127)
+    name = models.CharField(max_length=255)
     proposal_part = models.ForeignKey(ProposalPart)
     mep = models.ForeignKey(MEP, null=True)
     raw_mep = models.CharField(max_length=255)
