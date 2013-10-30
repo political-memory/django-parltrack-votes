@@ -1,2 +1,2 @@
 dateutils
-ijson
+git+git@github.com:Psycojoker/ijson.git
