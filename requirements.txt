@@ -1,2 +1,2 @@
 dateutils
-git+git@github.com:Psycojoker/ijson.git
+git+https://github.com/Psycojoker/ijson.git#egg=isjon
